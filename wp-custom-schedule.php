@@ -3,7 +3,12 @@
   Plugin Name: Adds Custom Schedules
   Description: Enables you to add your own custom schedules
 */
-class CronSchedule{
+if( ! class_exists('WP_List_Table')){
+    require_once(ABSPATH . 'wp-admin/includes/class-wp-screen.php');
+    require_once( ABSPATH . 'wp-admin/includes/screen.php' );
+    require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
+}
+class CronSchedule extends WP_List_Table{
     /* Constructor for class */
     public function __construct(){
         add_action('admin_menu', array($this, 'add_plugin_page') );
@@ -25,7 +30,15 @@ class CronSchedule{
         */
         ?>
         <div class="wrap">
-            <h1>Cron Schedules</h1>
+            <div id="icon-users">
+                <h1>Cron Schedules</h1>
+                <?php 
+                    //$cron_schedule = new CronSchedule();
+                    $this->screen = get_current_screen();
+                    $this->prepare_items();
+                    $this->display();
+                ?>
+            </div>
             <?php settings_errors(); ?>
             <form method="post" action="options.php">
             <?php 
@@ -94,10 +107,51 @@ class CronSchedule{
         unregister_setting('custom-schedules-group', 'custom_schedules');
         delete_option('custom_schedules');
     }
+
+    /* Table related stuff */
+
+    /* Creates an array of associative array for WP_List_Table */
+    public function prepare_data(){
+        $schedules = wp_get_schedules();        
+        foreach ($schedules as $key => $data){
+           $scheds['internal_name'] = $key;
+           $scheds = array_merge($scheds, $data);
+           $modscheds[] = $scheds;
+        }
+        return $modscheds;
+    }
+
+    public function get_columns(){
+        $columns = array(
+            'internal_name' => 'Internal Name',
+            'interval' => 'Interval(in seconds)',
+            'display' => 'Display Name'
+        );
+        return $columns;
+    }
+
+    public function prepare_items(){
+        $columns = $this->get_columns();
+        $hidden = array();
+        $sortable = array();
+        $this->_column_headers = array($columns, $hidden, $sortable);
+        $this->items = $this->prepare_data();
+    }
+
+    public function column_default($item, $column_name){
+        switch($column_name){
+            case 'internal_name':
+               //return array_keys($item)[0];
+            case 'interval':
+            case 'display':
+            return $item[$column_name];
+            default:return print_r($item, true);//Display whole array for trouble shooting
+        }
+    }
 }
 
 if(is_admin()){
     $cron_schedule = new CronSchedule();
-}   
+}
 
 ?>
