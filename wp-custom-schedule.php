@@ -25,15 +25,11 @@ class CronSchedule extends WP_List_Table{
 
     /* 'Cron Schedules' page callback */
     public function create_page(){
-        /* TODO display available schedules in a table
-        print_r(wp_get_schedules());
-        */
         ?>
         <div class="wrap">
             <div id="icon-users">
-                <h1>Cron Schedules</h1>
+                <h1>Available Cron Schedules</h1>
                 <?php 
-                    //$cron_schedule = new CronSchedule();
                     $this->screen = get_current_screen();
                     $this->prepare_items();
                     $this->display();
@@ -55,7 +51,7 @@ class CronSchedule extends WP_List_Table{
     // Adds necessary fields
     public function page_init(){
         register_setting('custom-schedules-group', 'custom_schedules', array($this, 'sanitize'));
-        add_settings_section('cust-secid','Custom Schedules-1', array($this, 'print_section_info'), 'custom-schedules-admin');
+        add_settings_section('cust-secid','Custom Schedules', array($this, 'print_section_info'), 'custom-schedules-admin');
         add_settings_field('internal-name', 'Internal Name', array($this, 'print_internal_name'),'custom-schedules-admin', 'cust-secid' );
         add_settings_field('interval', 'Interval(In Seconds)', array($this, 'print_interval'),'custom-schedules-admin', 'cust-secid' );
         add_settings_field('display-name', 'Display Name', array($this, 'print_display_name'),'custom-schedules-admin', 'cust-secid' );
@@ -141,7 +137,6 @@ class CronSchedule extends WP_List_Table{
     public function column_default($item, $column_name){
         switch($column_name){
             case 'internal_name':
-               //return array_keys($item)[0];
             case 'interval':
             case 'display':
             return $item[$column_name];
